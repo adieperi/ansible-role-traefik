@@ -15,6 +15,7 @@
     executable: /bin/bash
   notify:
     - Restart traefik
+    - Bind traefik
 
 - name: Change file ownership, group and permissions in "{{ binDirectory }}/traefik"
   file:
@@ -53,11 +54,20 @@
     path: "{{ item }}"
     state: directory
     owner: root
-    group: "{{ traefikSystemUser }}"
+    group: "{{ traefikSystemGroup }}"
     mode: 0770
   loop:
     - "{{ traefikConfigDir }}"
     - "{{ traefikDynamicConfigFilesDir }}"
+  when: traefikStat.stat.exists == false
+
+- name: Create acme config directory
+  file:
+    path: "{{ traefikAcmeDir }}"
+    state: directory
+    owner: "{{ traefikSystemUser }}"
+    group: "{{ traefikSystemGroup }}"
+    mode: 0700
   when: traefikStat.stat.exists == false
 
 - name: Create log directory
@@ -87,3 +97,10 @@
   notify:
     - Restart traefik
   when: traefikStat.stat.exists == false
+
+- name: Enable systemd service unit
+  shell: systemctl enable traefik.service
+  args:
+    executable: /bin/bash
+  notify:
+    - Restart traefik
