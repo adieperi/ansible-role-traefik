@@ -1,0 +1,5 @@
+---
+- name: Check that the "{{ traefikConfigDir }}" exists
+  stat:
+    path: "{{ traefikConfigDir }}"
+  register: traefikStat

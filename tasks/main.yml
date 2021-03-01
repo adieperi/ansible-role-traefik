@@ -1,0 +1,7 @@
+---
+- name: Include facts.yml
+  include: facts.yml
+
+- name: Include install.yml
+  include: install.yml
+  

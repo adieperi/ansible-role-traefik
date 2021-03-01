@@ -1,0 +1,12 @@
+---
+binDirectory: /usr/local/bin
+
+traefikSystemUser: traefik
+traefikSystemGroup: "{{ traefikSystemUser }}"
+
+traefikConfigDir: /etc/traefik
+traefikDynamicConfigFilesDir: "{{ traefikConfigDir }}/files"
+traefikConfigFile: "{{ traefikConfigDir }}/config.yml"
+
+traefikLogDir: /var/log/traefik
+traefikAccesLogFile: "{{ traefikLogDir }}/access.log"

@@ -1,0 +1,89 @@
+---
+- name: Include main.yml vars file
+  include_vars:
+    file: main.yml
+
+- name: Extract traefik archive into /tmp
+  unarchive:
+    src: https://github.com/traefik/traefik/releases/download/v{{ traefikVersion }}/traefik_v{{ traefikVersion }}_linux_amd64.tar.gz
+    dest: /tmp
+    remote_src: yes
+
+- name: Move "traefik" to "{{ binDirectory }}"
+  shell: mv /tmp/traefik {{ binDirectory }}/traefik
+  args:
+    executable: /bin/bash
+  notify:
+    - Restart traefik
+
+- name: Change file ownership, group and permissions in "{{ binDirectory }}/traefik"
+  file:
+    path: "{{ binDirectory }}/traefik"
+    owner: root
+    group: root
+    mode: '0555'
+
+- name: Delete /tmp/LICENSE.md and /tmp/CHANGELOG.md
+  file:
+    path: /tmp/{{ item }}
+    state: absent
+  loop:
+    - "LICENSE.md"
+    - "CHANGELOG.md"
+
+- name: Create traefik group
+  group:
+    name: "{{ traefikSystemGroup }}"
+    state: present
+    system: yes
+  when: traefikSystemGroup != "root"
+
+- name: Create traefik user
+  user:
+    name: "{{ traefikSystemUser }}"
+    group: "{{ traefikSystemGroup }}"
+    shell: /usr/sbin/nologin
+    system: yes
+    createhome: no
+    home: /
+  when: traefikSystemUser != "root"
+
+- name: Create config directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: "{{ traefikSystemUser }}"
+    mode: 0770
+  loop:
+    - "{{ traefikConfigDir }}"
+    - "{{ traefikDynamicConfigFilesDir }}"
+  when: traefikStat.stat.exists == false
+
+- name: Create log directory
+  file:
+    path: "{{ traefikLogDir }}"
+    state: directory
+    owner: root
+    group: "{{ traefikSystemUser }}"
+    mode: 0770
+
+- name: Import traefik config template
+  template:
+    src: config.j2
+    dest: "{{ traefikConfigFile }}"
+    owner: root
+    group: "{{ traefikSystemGroup }}"
+    mode: 0644
+  notify:
+    - Restart traefik
+  when: traefikStat.stat.exists == false
+
+- name: Create systemd service unit
+  template:
+    src: service.j2
+    dest: /etc/systemd/system/traefik.service
+    mode: 0644
+  notify:
+    - Restart traefik
+  when: traefikStat.stat.exists == false

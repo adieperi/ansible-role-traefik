@@ -1,0 +1,14 @@
+[Unit]
+Description=traefik
+After=network-online.target
+
+[Service]
+Restart=always
+RestartSec=5
+TimeoutSec=5
+User={{ traefikSystemUser }}
+Group={{ traefikSystemGroup }}
+ExecStart=/usr/local/bin/traefik --configFile={{ traefikConfigFile }}
+
+[Install]
+WantedBy=multi-user.target
