@@ -8,6 +8,7 @@
     src: https://github.com/traefik/traefik/releases/download/v{{ traefikVersion }}/traefik_v{{ traefikVersion }}_linux_amd64.tar.gz
     dest: /tmp
     remote_src: yes
+  when: traefikInstalledVersion.stdout < traefikVersion
 
 - name: Move "traefik" to "{{ binDirectory }}"
   shell: mv /tmp/traefik {{ binDirectory }}/traefik
@@ -16,13 +17,14 @@
   notify:
     - Restart traefik
     - Bind traefik
+  when: traefikInstalledVersion.stdout < traefikVersion
 
 - name: Change file ownership, group and permissions in "{{ binDirectory }}/traefik"
   file:
     path: "{{ binDirectory }}/traefik"
     owner: root
     group: root
-    mode: '0555'
+    mode: '0111'
 
 - name: Delete /tmp/LICENSE.md and /tmp/CHANGELOG.md
   file:
@@ -53,13 +55,12 @@
   file:
     path: "{{ item }}"
     state: directory
-    owner: root
+    owner: "{{ traefikSystemUser }}"
     group: "{{ traefikSystemGroup }}"
-    mode: 0770
+    mode: 0500
   loop:
     - "{{ traefikConfigDir }}"
     - "{{ traefikDynamicConfigFilesDir }}"
-  when: traefikStat.stat.exists == false
 
 - name: Create acme config directory
   file:
@@ -68,23 +69,22 @@
     owner: "{{ traefikSystemUser }}"
     group: "{{ traefikSystemGroup }}"
     mode: 0700
-  when: traefikStat.stat.exists == false
 
 - name: Create log directory
   file:
     path: "{{ traefikLogDir }}"
     state: directory
-    owner: root
-    group: "{{ traefikSystemUser }}"
-    mode: 0770
+    owner: "{{ traefikSystemUser }}"
+    group: adm
+    mode: 0750
 
 - name: Import traefik config template
   template:
-    src: config.j2
+    src: traefik.j2
     dest: "{{ traefikConfigFile }}"
-    owner: root
+    owner: "{{ traefikSystemUser }}"
     group: "{{ traefikSystemGroup }}"
-    mode: 0644
+    mode: 0600
   notify:
     - Restart traefik
   when: traefikStat.stat.exists == false
@@ -96,7 +96,6 @@
     mode: 0644
   notify:
     - Restart traefik
-  when: traefikStat.stat.exists == false
 
 - name: Enable systemd service unit
   shell: systemctl enable traefik.service

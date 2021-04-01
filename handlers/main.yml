@@ -3,7 +3,6 @@
   systemd:
     name: traefik
     state: restarted
-    daemon_reload: yes
 
 - name: Bind traefik
   shell: setcap 'cap_net_bind_service=+ep' {{ binDirectory }}/traefik

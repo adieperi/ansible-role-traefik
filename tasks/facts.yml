@@ -1,5 +1,13 @@
 ---
-- name: Check that the "{{ traefikConfigDir }}" exists
+- name: Check traefik version
+  shell: traefik version | grep 'Version:' | awk '{print $2}'
+  args:
+    executable: /bin/bash
+  ignore_errors: yes
+  changed_when: false
+  register: traefikInstalledVersion
+
+- name: Check that the "{{ traefikConfigFile }}" exists
   stat:
-    path: "{{ traefikConfigDir }}"
+    path: "{{ traefikConfigFile }}"
   register: traefikStat

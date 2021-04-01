@@ -1,0 +1,17 @@
+---
+log:
+  level: {{ traefikLogsLevel }}
+  filePath: "{{ traefikLogsFile }}"
+accessLog:
+  filePath: "{{ traefikAccessLogsFile }}"
+  bufferingSize: {{ traefikBufferingSize }}
+api:
+  insecure: true
+  dashboard: {{ traefikDashboardEnabled }}
+  debug: true
+pilot:
+  dashboard: {{ traefikDashboardPilotEnable }}
+providers:
+  file:
+    directory: {{ traefikDynamicConfigFilesDir }}
+    watch: true
