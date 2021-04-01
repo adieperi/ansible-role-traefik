@@ -8,7 +8,7 @@ RestartSec=5
 TimeoutSec=5
 User={{ traefikSystemUser }}
 Group={{ traefikSystemGroup }}
-ExecStart=/usr/local/bin/traefik --configFile={{ traefikConfigFile }}
+ExecStart=/usr/local/bin/traefik
 PrivateTmp=true
 PrivateDevices=false
 ProtectHome=true

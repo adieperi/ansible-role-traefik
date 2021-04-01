@@ -24,5 +24,5 @@ ansible-galaxy install -f -r ./roles/requirements.yml --roles-path=./roles
       include_role:
         name: ansible-role-traefik
       vars:
-        traefikVersion: 2.4.5
+        traefikVersion: 2.4.8
 ```

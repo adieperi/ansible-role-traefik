@@ -6,8 +6,9 @@ traefikSystemGroup: "{{ traefikSystemUser }}"
 
 traefikConfigDir: /etc/traefik
 traefikDynamicConfigFilesDir: "{{ traefikConfigDir }}/files"
-traefikConfigFile: "{{ traefikConfigDir }}/config.yml"
+traefikConfigFile: "{{ traefikConfigDir }}/traefik.yml"
 traefikAcmeDir: "{{ traefikConfigDir }}/acme"
 
 traefikLogDir: /var/log/traefik
-traefikAccesLogFile: "{{ traefikLogDir }}/access.log"
+traefikLogsFile: "{{ traefikLogDir }}/traefik.log"
+traefikAccessLogsFile: "{{ traefikLogDir }}/access.log"

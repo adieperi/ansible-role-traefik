@@ -4,4 +4,4 @@
 
 - name: Include install.yml
   include: install.yml
-  
+  when: traefikVersion >= '2.4.8'
