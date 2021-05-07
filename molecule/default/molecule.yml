@@ -11,7 +11,7 @@ lint: |
   ansible-lint
 
 platforms:
-  - name: "instance-docker-${MOLECULE_DISTRO:-debian10}-ansible-${GITHUB_JOB:-local}"
+  - name: "instance-docker-${MOLECULE_DISTRO:-debian10}-ansible-${GITHUB_RUN_NUMBER:-local}"
     image: "geerlingguy/docker-${MOLECULE_DISTRO:-debian10}-ansible:${MOLECULE_DISTRO_TAG:-latest}"
     command: ${MOLECULE_DOCKER_COMMAND:-""}
     volumes:
