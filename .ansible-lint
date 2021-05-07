@@ -1,0 +1,6 @@
+---
+exclude_paths:
+  - .cache/
+warn_list:
+  - literal-compare
+  - role-name

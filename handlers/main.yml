@@ -1,10 +1,13 @@
 ---
 - name: Restart traefik
   systemd:
-    name: traefik
+    name: traefik.service
     state: restarted
 
+- name: Enable traefik
+  systemd:
+    name: traefik.service
+    enabled: true
+
 - name: Bind traefik
-  shell: setcap 'cap_net_bind_service=+ep' {{ binDirectory }}/traefik
-  args:
-    executable: /bin/bash
+  command: setcap 'cap_net_bind_service=+ep' {{ traefik_bin_directory }}/traefik

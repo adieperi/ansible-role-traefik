@@ -1,0 +1,32 @@
+---
+- block:
+    - name: Get latest release
+      uri:
+        url: "https://api.github.com/repos/traefik/traefik/releases/latest"
+        method: GET
+        return_content: true
+        status_code: 200
+        body_format: json
+        validate_certs: false
+        user: "{{ lookup('env', 'GH_USER') | default(omit) }}"
+        password: "{{ lookup('env', 'GH_TOKEN') | default(omit) }}"
+      no_log: "{{ not lookup('env', 'ANSIBLE_DEBUG') | bool }}"
+      register: _latest_release
+      until: _latest_release.status == 200
+      retries: 5
+
+    - name: Set traefik version to "{{ _latest_release.json.tag_name[1:] }}"
+      set_fact:
+        traefik_version: "{{ _latest_release.json.tag_name[1:] }}"
+  when: traefik_version == "latest"
+
+- name: Get checksum list
+  set_fact:
+    __traefik_checksums: "{{ lookup('url', 'https://github.com/traefik/traefik/releases/download/v' + traefik_version + '/traefik_v' + traefik_version + '_checksums.txt', wantlist=true) | list }}"
+  run_once: true
+
+- name: Get checksum for "{{ go_arch }}" architecture
+  set_fact:
+    __traefik_checksum: "{{ item.split(' ')[0] }}"
+  with_items: "{{ __traefik_checksums }}"
+  when: "('traefik_v' + traefik_version + '_linux_' + go_arch + '.tar.gz') in item"

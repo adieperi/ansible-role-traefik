@@ -1,0 +1,6 @@
+---
+- name: Include variables files
+  include_vars:
+    file: "{{ item }}"
+  loop:
+    - main.yml

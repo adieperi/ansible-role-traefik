@@ -1,0 +1,12 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Check if traefik responds correctly
+      command: traefik version
+      changed_when: true
+      register: traefik_local_version
+
+    - name: Show restic output version
+      debug: var=traefik_local_version.stdout
