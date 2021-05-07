@@ -2,11 +2,20 @@
 go_arch_map:
   x86_64: 'amd64'
   aarch64: 'arm64'
+  armv7l: 'arm'
+  armv6l: 'arm'
 
 go_arch: "{{ go_arch_map[ansible_architecture] | default(ansible_architecture) }}"
 
-traefikVersion: 2.4.8
-traefikBufferingSize: 100
-traefikDashboardEnabled: true
-traefikDashboardPilotEnable: false
-traefikLogsLevel: ERROR
+traefik_bin_directory: /usr/local/bin
+traefik_tmp_directory: /tmp
+traefik_dist_url: "https://github.com/traefik/traefik/releases/download/v{{ restic_version }}/traefik_v{{ restic_version }}_linux_{{ go_arch }}.tar.gz"
+traefik_system_user: traefik
+traefik_system_group: "{{ traefik_system_user }}"
+traefik_config_dir: /etc/traefik
+traefik_dynamic_config_files_dir: "{{ traefik_config_dir }}/files"
+traefik_acme_dir: "{{ traefik_config_dir }}/acme"
+traefik_config_file: traefik.yml
+traefik_logs_dir: /var/log/traefik
+traefik_log_file: traefik.log
+traefik_access_log_file: access.log

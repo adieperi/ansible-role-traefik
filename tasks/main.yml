@@ -1,7 +1,10 @@
 ---
-- name: Include facts.yml
-  include: facts.yml
+- include_tasks: variables.yml
 
-- name: Include install.yml
-  include: install.yml
-  when: traefikVersion >= '2.4.8'
+- include_tasks: facts.yml
+
+- include_tasks: preflight.yml
+# when: traefik_installed_version.stdout < traefik_version
+
+- include_tasks: install.yml
+# when: traefik_installed_version.stdout < traefik_version

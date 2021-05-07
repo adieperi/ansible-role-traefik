@@ -1,93 +1,96 @@
 ---
-- name: Include main.yml vars file
-  include_vars:
-    file: main.yml
+- name: Download traefik archive
+  get_url:
+    url: "https://github.com/traefik/traefik/releases/download/v{{ traefik_version }}/traefik_v{{ traefik_version }}_linux_amd64.tar.gz"
+    dest: "{{ traefik_tmp_directory }}/traefik_v{{ traefik_version }}_linux_{{ go_arch }}.tar.gz"
+    force: true
+    checksum: "sha256:{{ __traefik_checksum }}"
+  when: traefik_installed_version.stdout < traefik_version
 
-- name: Extract traefik archive into /tmp
+- name: Unarchive "{{ traefik_tmp_directory }}/traefik_v{{ traefik_version }}_linux_{{ go_arch }}.tar.gz"
   unarchive:
-    src: https://github.com/traefik/traefik/releases/download/v{{ traefikVersion }}/traefik_v{{ traefikVersion }}_linux_amd64.tar.gz
-    dest: /tmp
-    remote_src: yes
-  when: traefikInstalledVersion.stdout < traefikVersion
+    src: "{{ traefik_tmp_directory }}/traefik_v{{ traefik_version }}_linux_{{ go_arch }}.tar.gz"
+    dest: "{{ traefik_tmp_directory }}"
+    remote_src: true
+  when: traefik_installed_version.stdout < traefik_version
 
-- name: Move "traefik" to "{{ binDirectory }}"
-  shell: mv /tmp/traefik {{ binDirectory }}/traefik
-  args:
-    executable: /bin/bash
+- name: Move "{{ traefik_tmp_directory }}/traefik" to "{{ traefik_bin_directory }}"
+  command: mv {{ traefik_tmp_directory }}/traefik {{ traefik_bin_directory }}/traefik
   notify:
     - Restart traefik
     - Bind traefik
-  when: traefikInstalledVersion.stdout < traefikVersion
+  when: traefik_installed_version.stdout < traefik_version
 
-- name: Change file ownership, group and permissions in "{{ binDirectory }}/traefik"
+- name: Change file ownership, group and permissions in "{{ traefik_bin_directory }}/traefik"
   file:
-    path: "{{ binDirectory }}/traefik"
+    path: "{{ traefik_bin_directory }}/traefik"
     owner: root
     group: root
-    mode: '0111'
+    mode: 0111
 
-- name: Delete /tmp/LICENSE.md and /tmp/CHANGELOG.md
+- name: Delete {{ traefik_tmp_directory }}/LICENSE.md and {{ traefik_tmp_directory }}/CHANGELOG.md
   file:
-    path: /tmp/{{ item }}
+    path: "{{ traefik_tmp_directory }}/{{ item }}"
     state: absent
   loop:
     - "LICENSE.md"
     - "CHANGELOG.md"
+    - traefik_v{{ traefik_version }}_linux_{{ go_arch }}.tar.gz
 
 - name: Create traefik group
   group:
-    name: "{{ traefikSystemGroup }}"
+    name: "{{ traefik_system_group }}"
     state: present
-    system: yes
-  when: traefikSystemGroup != "root"
+    system: true
+  when: traefik_system_group != "root"
 
 - name: Create traefik user
   user:
-    name: "{{ traefikSystemUser }}"
-    group: "{{ traefikSystemGroup }}"
+    name: "{{ traefik_system_user }}"
+    group: "{{ traefik_system_group }}"
     shell: /usr/sbin/nologin
-    system: yes
-    createhome: no
+    system: true
+    createhome: false
     home: /
-  when: traefikSystemUser != "root"
+  when: traefik_system_user != "root"
 
 - name: Create config directories
   file:
     path: "{{ item }}"
     state: directory
-    owner: "{{ traefikSystemUser }}"
-    group: "{{ traefikSystemGroup }}"
+    owner: "{{ traefik_system_user }}"
+    group: "{{ traefik_system_group }}"
     mode: 0500
   loop:
-    - "{{ traefikConfigDir }}"
-    - "{{ traefikDynamicConfigFilesDir }}"
+    - "{{ traefik_config_dir }}"
+    - "{{ traefik_dynamic_config_files_dir }}"
 
 - name: Create acme config directory
   file:
-    path: "{{ traefikAcmeDir }}"
+    path: "{{ traefik_acme_dir }}"
     state: directory
-    owner: "{{ traefikSystemUser }}"
-    group: "{{ traefikSystemGroup }}"
+    owner: "{{ traefik_system_user }}"
+    group: "{{ traefik_system_group }}"
     mode: 0700
 
 - name: Create log directory
   file:
-    path: "{{ traefikLogDir }}"
+    path: "{{ traefik_logs_dir }}"
     state: directory
-    owner: "{{ traefikSystemUser }}"
+    owner: "{{ traefik_system_user }}"
     group: adm
     mode: 0750
 
 - name: Import traefik config template
   template:
     src: traefik.j2
-    dest: "{{ traefikConfigFile }}"
-    owner: "{{ traefikSystemUser }}"
-    group: "{{ traefikSystemGroup }}"
+    dest: "{{ traefik_config_dir }}/{{ traefik_config_file }}"
+    owner: "{{ traefik_system_user }}"
+    group: "{{ traefik_system_group }}"
     mode: 0600
   notify:
     - Restart traefik
-  when: traefikStat.stat.exists == false
+  when: traefik_stat_config.stat.exists == false
 
 - name: Create systemd service unit
   template:
@@ -95,11 +98,5 @@
     dest: /etc/systemd/system/traefik.service
     mode: 0644
   notify:
-    - Restart traefik
-
-- name: Enable systemd service unit
-  shell: systemctl enable traefik.service
-  args:
-    executable: /bin/bash
-  notify:
+    - Enable traefik
     - Restart traefik

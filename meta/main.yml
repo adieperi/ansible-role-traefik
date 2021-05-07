@@ -2,16 +2,25 @@
 galaxy_info:
   author: Anthony Dieperink
   description: Ansible Role to install the traefik binary
+  role_name: ansible-role-traefik
   license: MIT
   min_ansible_version: 2.9
 
   platforms:
-  - name: Debian
-    versions:
-      - buster
+    - name: EL
+      versions:
+        - 8
+        - 7
+
+    - name: Ubuntu
+      versions:
+        - focal
+
+    - name: Debian
+      versions:
+        - buster
+
   galaxy_tags:
     - linux
     - proxy
-    - reverse-proxy
     - traefik
-    - traefik-v2
