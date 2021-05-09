@@ -18,7 +18,6 @@
   command: mv {{ traefik_tmp_directory }}/traefik {{ traefik_bin_directory }}/traefik
   notify:
     - Restart traefik
-    - Bind traefik
   when: traefik_installed_version.stdout < traefik_version
 
 - name: Change file ownership, group and permissions in "{{ traefik_bin_directory }}/traefik"

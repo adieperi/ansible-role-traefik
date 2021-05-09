@@ -8,6 +8,3 @@
   systemd:
     name: traefik.service
     enabled: true
-
-- name: Bind traefik
-  command: setcap 'cap_net_bind_service=+ep' {{ traefik_bin_directory }}/traefik

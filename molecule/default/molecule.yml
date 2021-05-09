@@ -31,8 +31,8 @@ scenario:
     - create
     - converge
     - idempotence
+    - verify
     - destroy
-
 
 verifier:
   name: ansible
