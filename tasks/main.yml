@@ -4,7 +4,5 @@
 - include_tasks: facts.yml
 
 - include_tasks: preflight.yml
-# when: traefik_installed_version.stdout < traefik_version
 
 - include_tasks: install.yml
-# when: traefik_installed_version.stdout < traefik_version

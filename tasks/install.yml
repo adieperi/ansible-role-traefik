@@ -89,7 +89,7 @@
     mode: 0600
   notify:
     - Restart traefik
-  when: traefik_stat_config.stat.exists == false
+  when: not traefik_stat_config.stat.exists | bool
 
 - name: Create systemd service unit
   template:

@@ -7,7 +7,7 @@
   changed_when: false
   register: traefik_installed_version
 
-- name: Check that the "{{ traefik_config_file }}" exists
+- name: Check that the "{{ traefik_config_dir }}/{{ traefik_config_file }}" exists
   stat:
-    path: "{{ traefik_config_file }}"
+    path: "{{ traefik_config_dir }}/{{ traefik_config_file }}"
   register: traefik_stat_config
